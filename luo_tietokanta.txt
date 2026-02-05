@@ -1,0 +1,141 @@
+Alla olevalla skriptillä voi luoda tietokannan (phpMyAdmin -> SQL -> 
+Liitä skripti -> Siirry), luo uuden tietokannan nimeltään omavalmentaja_app
+Jossa taulut: muistiinpanot, omavalmentajat, opiskelijat, ryhmat
+
+CREATE DATABASE IF NOT EXISTS omavalmentaja_app 
+
+  CHARACTER SET utf8mb4 
+
+  COLLATE utf8mb4_unicode_ci; 
+
+  
+
+USE omavalmentaja_app; 
+
+  
+
+-- ===================== 
+
+-- Omavalmentajat 
+
+-- ===================== 
+
+CREATE TABLE omavalmentajat ( 
+
+    id INT AUTO_INCREMENT PRIMARY KEY, 
+
+    name VARCHAR(255) NOT NULL, 
+
+    email VARCHAR(255) NOT NULL UNIQUE, 
+
+    password_hash VARCHAR(255) NOT NULL, 
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP 
+
+) ENGINE=InnoDB; 
+
+  
+
+-- ===================== 
+
+-- Ryhmät 
+
+-- ===================== 
+
+CREATE TABLE ryhmat ( 
+
+    id INT AUTO_INCREMENT PRIMARY KEY, 
+
+    name VARCHAR(255) NOT NULL, 
+
+    created_by INT NOT NULL, 
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
+
+    CONSTRAINT fk_ryhmat_created_by 
+
+        FOREIGN KEY (created_by) 
+
+        REFERENCES omavalmentajat(id) 
+
+        ON DELETE CASCADE 
+
+) ENGINE=InnoDB; 
+
+  
+
+-- ===================== 
+
+-- Opiskelijat 
+
+-- ===================== 
+
+CREATE TABLE opiskelijat ( 
+
+    id INT AUTO_INCREMENT PRIMARY KEY, 
+
+    name VARCHAR(255) NOT NULL, 
+
+    email VARCHAR(255) UNIQUE, 
+
+    group_id INT, 
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
+
+    CONSTRAINT fk_opiskelijat_group 
+
+        FOREIGN KEY (group_id) 
+
+        REFERENCES ryhmat(id) 
+
+        ON DELETE SET NULL 
+
+) ENGINE=InnoDB; 
+
+  
+
+-- ===================== 
+
+-- Muistiinpanot 
+
+-- ===================== 
+
+CREATE TABLE muistiinpanot ( 
+
+    id INT AUTO_INCREMENT PRIMARY KEY, 
+
+    student_id INT NOT NULL, 
+
+    user_id INT NOT NULL, 
+
+    content TEXT NOT NULL, 
+
+    is_completed BOOLEAN DEFAULT FALSE, 
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
+
+    CONSTRAINT fk_muistiinpanot_student 
+
+        FOREIGN KEY (student_id) 
+
+        REFERENCES opiskelijat(id) 
+
+        ON DELETE CASCADE, 
+
+    CONSTRAINT fk_muistiinpanot_user 
+
+        FOREIGN KEY (user_id) 
+
+        REFERENCES omavalmentajat(id) 
+
+        ON DELETE CASCADE 
+
+) ENGINE=InnoDB; 
